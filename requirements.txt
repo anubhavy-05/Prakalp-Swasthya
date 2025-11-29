@@ -9,9 +9,13 @@
 # Web Framework & Deployment
 flask==3.0.0
 gunicorn==21.2.0
+python-dotenv==1.0.0
 
 # Twilio WhatsApp Integration
 twilio==8.10.0
+
+# Security & Validation
+werkzeug==3.0.1
 
 # Optional: For enhanced features (uncomment as needed)
 
