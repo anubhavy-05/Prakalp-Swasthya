@@ -4,7 +4,9 @@
 
 ---
 
-## 💬 Try It Now on WhatsApp!
+## 🚀 How to Start
+
+### 💬 Try It Now on WhatsApp!
 
 **Want to experience SwasthyaGuide?** Send a message to our chatbot on WhatsApp:
 
