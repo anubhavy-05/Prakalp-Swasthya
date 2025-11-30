@@ -14,7 +14,7 @@
 
 1. **Open WhatsApp** on your phone
 
-2. **Save this number:** `+1 415 523 8886`
+2. **Save this number:** [+1 415 523 8886](https://wa.me/14155238886)
 
 3. **Send this activation code:**
    ```
@@ -40,7 +40,7 @@ You: chest pain
 Bot: [Sends emergency alert with 108 number]
 ```
 
-**📲 WhatsApp Number:** +1 415 523 8886  
+**📲 WhatsApp Number:** [+1 415 523 8886](https://wa.me/14155238886?text=join%20yellow-cheese)  
 **🔑 Activation Code:** `join yellow-cheese`
 
 ---
@@ -296,7 +296,7 @@ curl http://localhost:5000/health
 ### WhatsApp Testing
 **Try the live bot right now!**
 
-1. **Add to WhatsApp:** +1 415 523 8886
+1. **Add to WhatsApp:** [+1 415 523 8886](https://wa.me/14155238886?text=join%20yellow-cheese)
 2. **Activate:** Send `join yellow-cheese`
 3. **Start chatting:** Try `Mujhe sir dard ho raha hai`
 
@@ -361,7 +361,7 @@ This project is licensed under the MIT License.
 ## 📞 Support & Contact
 
 ### 💬 Try the Live Bot
-- **WhatsApp:** +1 415 523 8886
+- **WhatsApp:** [+1 415 523 8886](https://wa.me/14155238886?text=join%20yellow-cheese) ← Click to start chatting!
 - **Activation:** Send `join yellow-cheese`
 - **Available:** 24/7
 
