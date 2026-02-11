@@ -12,6 +12,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
 from chatbot import SwasthyaGuide
 from config_loader import Config
+import requests
 
 # Configure logging
 logging.basicConfig(
@@ -80,11 +81,41 @@ def whatsapp_webhook():
         # Extract incoming message from Twilio request
         incoming_msg = request.values.get('Body', '').strip()
         sender = request.values.get('From', '')
+        num_media = int(request.values.get('NumMedia', 0))
         
         # Log incoming message (remove PII in production)
-        logger.info(f"Received message: '{incoming_msg}' from {sender[:15]}...")
+        logger.info(f"Received message: '{incoming_msg}' from {sender[:15]}... (Media: {num_media})")
         
-        # Validate message
+        # Check if image/media is attached
+        if num_media > 0:
+            logger.info(f"Processing {num_media} media file(s)")
+            media_url = request.values.get('MediaUrl0', '')
+            media_type = request.values.get('MediaContentType0', '')
+            
+            logger.info(f"Media URL: {media_url}, Type: {media_type}")
+            
+            # Download and process image
+            try:
+                # Download image from Twilio's media URL
+                media_response = requests.get(media_url, timeout=10)
+                media_response.raise_for_status()
+                image_data = media_response.content
+                
+                # Process image with caption/message
+                bot_response = bot.process_image_message(image_data, incoming_msg, media_type)
+                logger.info(f"Image processed successfully")
+                
+                resp = MessagingResponse()
+                resp.message(bot_response)
+                return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
+                
+            except Exception as e:
+                logger.error(f"Error processing image: {str(e)}", exc_info=True)
+                resp = MessagingResponse()
+                resp.message("छवि संसाधित करने में त्रुटि। कृपया पुनः प्रयास करें। / Error processing image. Please try again.")
+                return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
+        
+        # Validate text message
         if not incoming_msg:
             logger.warning("Empty message received")
             resp = MessagingResponse()
