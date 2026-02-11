@@ -17,6 +17,10 @@ twilio==8.10.0
 # Security & Validation
 werkzeug==3.0.1
 
+# Image Processing (Required for image analysis feature)
+Pillow==10.2.0
+requests==2.31.0
+
 # Optional: For enhanced features (uncomment as needed)
 
 # For advanced NLP and language detection
