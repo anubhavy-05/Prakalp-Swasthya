@@ -1,12 +1,224 @@
 {
-  "Lucknow_Gomti_Nagar": [
+  "Lucknow_Gomti_Nagar_Vikas_Khand": [
     {
-      "name": "Clinic Name Here",
-      "address": "Complete address with area, Gomti Nagar, Lucknow - 226010",
+      "name": "Trisha Medico",
+      "address": "Vikas Khand, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "24 Hour Service", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Patrakarpuram": [
+    {
+      "name": "Pharmacos Medical",
+      "address": "Patrakarpuram Chauraha, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "24 Hour Service", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Laxmi Medical Store",
+      "address": "Patrakarpuram, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Home Delivery", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Bhoomi Herbs Life Care",
+      "address": "Patrakarpuram, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Ayurvedic Pharmacy", "Herbal Medicines", "Natural Remedies"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Patanjali Aarogya Kendra",
+      "address": "Patrakarpuram, Gomti Nagar, Lucknow - 226010",
+      "timing": "9:00 AM - 9:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Ayurvedic Pharmacy", "Patanjali Products", "Natural Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Ginni Medicals",
+      "address": "Patrakarpuram Chauraha, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Retail Chemist", "General Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Annapurneshwar Medical Store",
+      "address": "Patrakarpuram Chauraha, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Retail Chemist", "General Medicines"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Vishesh_Khand": [
+    {
+      "name": "Dr. PushpLata Pharmacy",
+      "address": "Vishesh Khand 3, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "24 Hour Service", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Vivek_Khand": [
+    {
+      "name": "Ridansh Hospital Pharmacy",
+      "address": "Vivek Khand 2, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Hospital Pharmacy", "24 Hour Service", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Lucknow Homoeo's",
+      "address": "Vivek Khand, Gomti Nagar, Lucknow - 226010",
       "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
       "phone": "+91-522-XXXXXXXX",
-      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
-      "fees": "₹300-500"
+      "specialties": ["Homeopathic Pharmacy", "Homeopathic Medicines", "Alternative Medicine"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Viram_Khand": [
+    {
+      "name": "Sahaj Super Speciality Pharmacy",
+      "address": "Viram Khand, Beside Dewa Palace, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Super Specialty Pharmacy", "24 Hour Service", "Specialty Medicines"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Viraj_Khand": [
+    {
+      "name": "Vansh Medical Hall",
+      "address": "Haniman Crossing, Viraj Khand, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Medical Store", "Surgical Supplies"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Rajdhani Medicals",
+      "address": "Haniman Crossing, Viraj Khand, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Medical Store", "General Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Max Super Speciality Hospital",
+      "address": "Viraj Khand, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours Emergency (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Multi Specialty Hospital", "Emergency Care", "Inpatient Services"],
+      "fees": "Hospital Charges"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Vibhuti_Khand": [
+    {
+      "name": "Samrat Pharmacy",
+      "address": "Vibhuti Khand, Near RML Hospital, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Surgical Medicines", "Specialty Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Dr. Ram Manohar Lohia Institute (RMLIMS)",
+      "address": "Vibhuti Khand, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours Emergency (All days)",
+      "phone": "+91-522-2668700",
+      "specialties": ["Government Hospital", "Multi Specialty", "Medical Education"],
+      "fees": "Government Rates"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Shahid_Path": [
+    {
+      "name": "Aarav Medicals",
+      "address": "MVD Plaza, Shahid Path, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "24 Hour Service", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Lokesh Medical Store",
+      "address": "Near Jeevan Plaza, Shahid Path, Gomti Nagar, Lucknow - 226010",
+      "timing": "24 Hours (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "24 Hour Service", "Emergency Medicines"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Husariya_Chauraha": [
+    {
+      "name": "Singhal Medical Store",
+      "address": "Husariya Chauraha, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Medical Store", "General Medicines"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Pavitra Medicals",
+      "address": "Husariya Chauraha, Gomti Nagar, Lucknow - 226010",
+      "timing": "8:00 AM - 10:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Pharmacy", "Medical Store", "General Medicines"],
+      "fees": "Medicine Costs"
+    }
+  ],
+  "Lucknow_Gomti_Nagar_Central": [
+    {
+      "name": "Yash Ayurvedic & Homeopathic",
+      "address": "Opposite Awadh Mall, Gomti Nagar, Lucknow - 226010",
+      "timing": "9:00 AM - 9:00 PM (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Ayurvedic Pharmacy", "Homeopathic Medicines", "Alternative Medicine"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Gomti Homeo",
+      "address": "Near St. Francis School, Gomti Nagar, Lucknow - 226010",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Homeopathic Pharmacy", "Homeopathic Medicines", "Alternative Medicine"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Shree Ganpati Homoeopathic",
+      "address": "Golden Arch Complex, Near National Homeopathic Medical College, Gomti Nagar, Lucknow - 226010",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Homeopathic Pharmacy", "Specialized Homeopathy", "Alternative Medicine"],
+      "fees": "Medicine Costs"
+    },
+    {
+      "name": "Chandan Hospital",
+      "address": "Near Faizabad Road, Gomti Nagar Border, Lucknow - 226010",
+      "timing": "24 Hours Emergency (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Multi Specialty Hospital", "Emergency Care", "Inpatient Services"],
+      "fees": "Hospital Charges"
+    }
+  ],
+  "Lucknow_Sushant_Golf_City": [
+    {
+      "name": "Medanta Hospital",
+      "address": "Sushant Golf City, Gomti Nagar Extension, Lucknow - 226030",
+      "timing": "24 Hours Emergency (All days)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["Super Specialty Hospital", "Emergency Care", "Advanced Medical Care"],
+      "fees": "Hospital Charges"
     }
   ],
   "Lucknow_Hazratganj": [
