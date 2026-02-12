@@ -78,5 +78,25 @@
       "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
       "fees": "₹300-500"
     }
+  ],
+  "Lucknow_Aashiana": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Aashiana, Lucknow - 226012",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Chinhat": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Chinhat, Lucknow - 226028",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
   ]
 }
