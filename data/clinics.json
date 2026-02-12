@@ -98,5 +98,75 @@
       "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
       "fees": "₹300-500"
     }
+  ],
+  "Lucknow_BBD_University": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, BBD University / Faizabad Road, Lucknow - 226028",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Vikas_Nagar": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Vikas Nagar, Lucknow - 226022",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Nirala_Nagar": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Nirala Nagar, Lucknow - 226020",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Daliganj": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Daliganj, Lucknow - 226020",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Husainganj": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Husainganj, Lucknow - 226003",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Chowk": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Chowk, Lucknow - 226003",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
+  ],
+  "Lucknow_Kaiserbagh": [
+    {
+      "name": "Clinic Name Here",
+      "address": "Complete address with area, Kaiserbagh, Lucknow - 226001",
+      "timing": "9:00 AM - 8:00 PM (Mon-Sat)",
+      "phone": "+91-522-XXXXXXXX",
+      "specialties": ["General Medicine", "Specialty 1", "Specialty 2"],
+      "fees": "₹300-500"
+    }
   ]
 }
