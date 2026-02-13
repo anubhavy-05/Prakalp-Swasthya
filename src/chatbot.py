@@ -153,6 +153,11 @@ class SwasthyaGuide:
         """
         # Detect language
         language = detect_language(user_input)
+        
+        # Override: If English is detected, respond in Hindi
+        if language == 'english':
+            language = 'hindi'
+        
         self.user_context['language'] = language
         
         # Initialize intent
@@ -219,7 +224,12 @@ class SwasthyaGuide:
         Returns formatted response with image analysis
         """
         # Detect language from caption if provided
-        language = detect_language(caption) if caption else 'english'
+        language = detect_language(caption) if caption else 'hindi'
+        
+        # Override: If English is detected, respond in Hindi
+        if language == 'english':
+            language = 'hindi'
+        
         self.user_context['language'] = language
         
         # Analyze the image
