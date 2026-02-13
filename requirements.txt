@@ -31,12 +31,13 @@ numpy>=1.26.0
 # For location services
 # geopy==2.3.0
 
-# For database support
-# sqlite3 (built-in)
-# pymongo==4.4.1
+# Database support - PostgreSQL
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.23
+alembic==1.13.1
 
 # For API integration
-# requests==2.31.0
+requests==2.31.0
 
 # For testing
 # pytest==7.4.0

@@ -10,8 +10,8 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
-from chatbot import SwasthyaGuide
-from config_loader import Config
+from src.chatbot import SwasthyaGuide
+from src.config_loader import Config
 import requests
 
 # Configure logging
@@ -32,6 +32,19 @@ try:
 except ValueError as e:
     logger.warning(f"Configuration warning: {e}")
 
+# Initialize database
+try:
+    from database import init_db
+    db_manager = init_db(Config.DATABASE_URL)
+    logger.info("Database connection initialized successfully")
+    
+    # Optionally create tables on startup (recommended for first deployment)
+    # db_manager.create_tables()
+    
+except Exception as e:
+    logger.error(f"Database initialization failed: {e}")
+    logger.warning("Application will continue without database logging")
+
 # Initialize SwasthyaGuide bot instance globally
 bot = SwasthyaGuide()
 logger.info("SwasthyaGuide bot initialized")
@@ -51,9 +64,20 @@ def home():
 @app.route('/health')
 def health_check():
     """Health check endpoint for monitoring"""
+    db_health = {'status': 'not_initialized'}
+    
+    # Check database health if available
+    try:
+        from database import get_db_manager
+        db_manager = get_db_manager()
+        db_health = db_manager.health_check()
+    except Exception as e:
+        db_health = {'status': 'unavailable', 'error': str(e)}
+    
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.now().isoformat()
+        'timestamp': datetime.now().isoformat(),
+        'database': db_health
     }), 200
 
 
@@ -83,6 +107,12 @@ def whatsapp_webhook():
         sender = request.values.get('From', '')
         num_media = int(request.values.get('NumMedia', 0))
         
+        # Extract phone number (remove whatsapp: prefix)
+        user_phone = sender.replace('whatsapp:', '') if sender.startswith('whatsapp:') else sender
+        
+        # Create session-specific bot instance
+        session_bot = SwasthyaGuide(session_id=sender, user_phone=user_phone)
+        
         # Log incoming message (remove PII in production)
         logger.info(f"Received message: '{incoming_msg}' from {sender[:15]}... (Media: {num_media})")
         
@@ -102,7 +132,7 @@ def whatsapp_webhook():
                 image_data = media_response.content
                 
                 # Process image with caption/message
-                bot_response = bot.process_image_message(image_data, incoming_msg, media_type)
+                bot_response = session_bot.process_image_message(image_data, incoming_msg, media_type)
                 logger.info(f"Image processed successfully")
                 
                 resp = MessagingResponse()
@@ -131,7 +161,7 @@ def whatsapp_webhook():
         
         # Process message through SwasthyaGuide bot
         logger.info(f"Processing message through bot...")
-        bot_response = bot.process_message(incoming_msg)
+        bot_response = session_bot.process_message(incoming_msg)
         logger.info(f"Bot response generated: {bot_response[:100]}...")
         
         # Create Twilio response

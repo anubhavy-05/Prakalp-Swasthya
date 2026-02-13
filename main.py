@@ -4,7 +4,7 @@ SwasthyaGuide - Main Entry Point
 A multilingual healthcare assistant for accessible health guidance in India
 """
 
-from chatbot import SwasthyaGuide
+from src.chatbot import SwasthyaGuide
 
 
 def main():

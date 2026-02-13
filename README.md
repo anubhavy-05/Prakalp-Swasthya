@@ -5,6 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
 [![Twilio](https://img.shields.io/badge/Twilio-WhatsApp-red.svg)](https://www.twilio.com/whatsapp)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **A compassionate, multilingual healthcare chatbot for accessible health guidance in India 🇮🇳**
@@ -12,6 +13,21 @@
 [Try on WhatsApp](#-try-it-now) • [Features](#-features) • [Deploy Your Own](#-deployment) • [Documentation](#-documentation)
 
 </div>
+
+---
+
+## 🆕 What's New in v2.0
+
+### ⚡ PostgreSQL Database Integration
+SwasthyaGuide has been upgraded with enterprise-grade PostgreSQL database:
+
+- **✅ Conversation History** - Track all user interactions
+- **✅ User Profiles** - Personalized experience with preferences
+- **✅ Analytics & Metrics** - Usage statistics and insights
+- **✅ Scalable Search** - Fast clinic lookup with indexing
+- **✅ Cloud Ready** - Production deployment on Render/Railway/Heroku
+
+**Quick Setup:** See [PostgreSQL Migration Guide](POSTGRESQL_MIGRATION.md) or [Quick Start (5 min)](POSTGRESQL_QUICKSTART.md)
 
 ---
 
@@ -115,6 +131,67 @@ Interactive symptom assessment:
 - ❌ Recommend antibiotics
 - ❌ Give harmful home remedies
 - ❌ Make unsupported medical claims
+
+---
+
+## 📁 Project Structure
+
+```
+Prakalp-Swasthya/
+├── app.py                    # Flask web server (WhatsApp webhook)
+├── main.py                   # CLI interface entry point
+├── requirements.txt          # Python dependencies
+├── config.json              # Application configuration
+├── Procfile                 # Heroku deployment config
+├── render.yaml              # Render deployment config
+├── README.md                # This file
+│
+├── src/                     # 📦 Source code modules
+│   ├── chatbot.py          # Main chatbot orchestrator
+│   ├── clinic_finder.py    # Clinic search & recommendations
+│   ├── config_loader.py    # Configuration management
+│   ├── emergency_handler.py # Emergency detection & response
+│   ├── health_responses.py # Health guidance responses
+│   ├── image_analyzer.py   # Image analysis for skin conditions
+│   ├── language_detector.py # Language detection
+│   └── symptom_checker.py  # Symptom extraction & checking
+│
+├── database/                # 🗄️ Database layer (PostgreSQL)
+│   ├── models.py           # SQLAlchemy ORM models
+│   ├── connection.py       # Database connection manager
+│   └── __init__.py         # Package initialization
+│
+├── scripts/                 # 🛠️ Utility scripts
+│   ├── init_database.py    # Database initialization
+│   └── migrate_to_postgres.py # JSON to PostgreSQL migration
+│
+├── docs/                    # 📚 Documentation
+│   ├── README.md           # Documentation index
+│   ├── QUICK_START.md      # 5-minute setup guide
+│   ├── POSTGRESQL_QUICKSTART.md # Database setup
+│   ├── POSTGRESQL_MIGRATION.md  # Complete migration guide
+│   ├── DEPLOYMENT_GUIDE.md # Cloud deployment
+│   ├── ARCHITECTURE.md     # System architecture
+│   └── ... (more docs)
+│
+├── tests/                   # 🧪 Test suite
+│   ├── unit/               # Unit tests
+│   ├── integration/        # Integration tests
+│   └── test_*.py           # Test files
+│
+└── data/                    # 📊 Data files
+    ├── clinics.json        # Clinic database (467 clinics)
+    └── translations.json   # Multilingual translations
+```
+
+### Quick Navigation
+- 📖 **[Complete Documentation](docs/README.md)**
+- 🚀 **[Quick Start Guide](docs/QUICK_START.md)**
+- 🏗️ **[Architecture Details](docs/ARCHITECTURE.md)**
+- ☁️ **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)**
+- 🗄️ **[PostgreSQL Setup](docs/POSTGRESQL_QUICKSTART.md)**
+
+---
 
 ## 🚀 Quick Start Guide
 
