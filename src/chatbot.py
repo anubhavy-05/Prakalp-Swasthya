@@ -20,6 +20,7 @@ try:
     DB_AVAILABLE = True
 except ImportError:
     DB_AVAILABLE = False
+    logger.warning("Database module not available - conversation logging disabled")
 
 logger = logging.getLogger(__name__)
 
