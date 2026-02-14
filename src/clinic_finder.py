@@ -30,18 +30,39 @@ def extract_location(text: str) -> Optional[str]:
     # Simple location extraction - looks for common patterns
     # In production, you'd use NER or location API
     
-    # Remove common words
+    # Clean the input
+    text = text.strip()
+    
+    # If input is a pincode (6 digits), return as is
+    if text.isdigit() and len(text) == 6:
+        logger.info(f"Detected pincode: {text}")
+        return text
+    
+    # Remove common filler words but keep location-related terms
     words = text.split()
     location_words = []
     
-    skip_words = ['mein', 'ka', 'ki', 'hai', 'hain', 'the', 'in', 'at', 'near', 'me', 'please']
+    skip_words = [
+        'mein', 'ka', 'ki', 'hai', 'hain', 'the', 'in', 'at', 'me', 
+        'please', 'kripya', 'se', 'batayen', 'batao', 'bataye', 'tell',
+        'my', 'is', 'area', 'location', 'jagah', 'city', 'shahar'
+    ]
     
     for word in words:
-        if word.lower() not in skip_words and len(word) > 2:
-            location_words.append(word)
+        cleaned_word = word.strip('.,!?;:')
+        if cleaned_word.lower() not in skip_words and len(cleaned_word) > 2:
+            location_words.append(cleaned_word)
     
     if location_words:
-        return ' '.join(location_words[:3])  # Take first few words as location
+        # Join extracted words (up to 3 words for compound locations)
+        location = ' '.join(location_words[:3])
+        logger.info(f"Extracted location: {location}")
+        return location
+    
+    # If no words matched but input had content, return cleaned input
+    if len(text) > 2:
+        logger.info(f"Using full input as location: {text}")
+        return text
     
     return None
 
