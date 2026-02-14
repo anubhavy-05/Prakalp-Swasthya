@@ -10,6 +10,32 @@ from typing import List
 def handle_headache(language: str) -> str:
     """Provide guidance for headache"""
     responses = {
+        'hinglish': """
+1️⃣ **Sir dard ke common karan:**
+Sir dard kai reasons se ho sakta hai - kam neend, stress, dehydration, tension, aankh ki weakness, ya long screen time.
+
+2️⃣ **Ghar par aap ye try kar sakte hain:**
+• Quiet aur dark room mein rest karein
+• Zyada pani piyein (8-10 glass daily)
+• Maatha par thanda pani ka kapda rakhein
+• Aankh band karke 15-20 minute rest lein
+• Screen time kam karein
+• Halka stretching ya walk karein
+• Proper neend lein (7-8 hours)
+
+3️⃣ **Doctor ko kab dikhayein:**
+⚠️ Agar pain bahut zyada ho
+⚠️ 2-3 din se zyada chal raha ho
+⚠️ Vomiting, dizziness, ya dekhne mein problem ho
+⚠️ Baar baar ho raha ho
+⚠️ Ghar ke upay se relief nahi mil raha
+
+4️⃣ **Kya aapko najdeeki clinic ki zaroorat hai?**
+Agar haan, toh apna area, city, ya pincode bataayein.
+
+5️⃣ **Disclaimer:**
+Yeh medical diagnosis nahi hai. Agar condition serious lage toh immediately doctor ko dikhaye.
+""",
         'hindi': """
 1️⃣ **Sir dard ke samanya karan:**
 Sir dard kai karan se ho sakta hai - kam neend, stress, dehydration, tension, aankh ki kamzori, ya long screen time.
@@ -392,6 +418,27 @@ This is not a medical diagnosis. If the condition seems serious, please consult 
 def get_general_health_tips(language: str) -> str:
     """Provide general health tips"""
     responses = {
+        'hinglish': """
+Namaste! Main SwasthyaGuide hoon. 🙏
+
+**Mujhse aap ye pooch sakte hain:**
+• Sir dard, fever, stomach pain jaise common problems
+• Ghar par kya kar sakte hain
+• Doctor kab dikhana chahiye
+• Najdeeki clinic kahan hai
+
+**Kuch healthy tips:**
+✅ Din mein 7-8 hours soyein
+✅ Pani zyada piyein (8-10 glass)
+✅ Fruits aur vegetables khayein
+✅ Thoda exercise ya walk daily karein
+✅ Hand washing regularly karein
+
+Aapki kya problem hai? Mujhe detail mein bataayein toh main better help kar sakta hoon.
+
+**Yaad rakhein:**
+Yeh medical diagnosis nahi hai. Serious problem ho toh doctor se zaroor milein.
+""",
         'hindi': """
 Namaste! Main SwasthyaGuide hoon. 🙏
 

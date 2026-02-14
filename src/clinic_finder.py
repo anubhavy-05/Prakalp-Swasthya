@@ -216,6 +216,22 @@ def find_nearby_clinics(location: str, language: str) -> str:
     if not matching_clinics:
         # No clinics found
         responses = {
+            'hinglish': f"""
+Sorry, mere database mein "{location}" ke liye clinic information nahi hai.
+
+**Aap ye kar sakte hain:**
+• Location key format mein try karein (jaise: Lucknow_Gomti_Nagar_Patrakarpuram)
+• Sirf area naam dijiye (jaise: Patrakarpuram, Gomti Nagar)
+• Pincode dijiye (jaise: 226010)
+• Google Maps par "clinic near me" search karein
+• Local hospital ka helpline number call karein
+
+Ya fir doctor ko urgent dekhna hai toh:
+• Najdeeki government hospital jayein
+• 108 (Ambulance/Health helpline) dial karein
+
+Koi aur location try karna chahenge?
+""",
             'hindi': f"""
 Maaf kijiye, mere database mein "{location}" ke liye clinic information nahi hai.
 
@@ -337,6 +353,13 @@ Would you like to try a different area?
     
     # Format clinic information
     language_headers = {
+        'hinglish': {
+            'title': f"**{location} ke najdeeki clinics:**\n\n",
+            'address': "📍 Address",
+            'timing': "🕐 Timing",
+            'phone': "📞 Phone",
+            'footer': "**Yaad rakhein:** Jaane se pehle phone kar lein.\n"
+        },
         'hindi': {
             'title': f"**{location} ke najdeeki clinics:**\n\n",
             'address': "📍 Address",
@@ -395,11 +418,13 @@ Would you like to try a different area?
         }
     }
     
-    headers = language_headers.get(language, language_headers['hindi'])
+    headers = language_headers.get(language, language_headers['hinglish'])
     
     # Show message about number of results
     num_clinics = len(matching_clinics)
-    if language == 'hindi':
+    if language == 'hinglish':
+        clinic_text = f"**{location} ke najdeeki {num_clinics} clinics mil gaye:**\n\n"
+    elif language == 'hindi':
         clinic_text = f"**{location} ke najdeeki {num_clinics} clinics mil gaye:**\n\n"
     else:
         clinic_text = f"**Found {num_clinics} nearby clinics in {location}:**\n\n"
