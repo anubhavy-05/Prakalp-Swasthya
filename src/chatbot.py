@@ -43,7 +43,9 @@ class SwasthyaGuide:
             'language': None,
             'location': None,
             'symptoms': [],
-            'emergency_detected': False
+            'emergency_detected': False,
+            'waiting_for_location': False,
+            'last_detected_symptoms': []
         }
         # Initialize image analyzer
         self.image_analyzer = ImageAnalyzer()
@@ -158,6 +160,53 @@ class SwasthyaGuide:
         # Initialize intent
         detected_intent = 'general'
         
+        # Check if we're waiting for location from previous conversation
+        if self.user_context.get('waiting_for_location', False):
+            # Check if user is declining the clinic search (use word boundaries)
+            user_input_lower = user_input.lower()
+            user_words = user_input_lower.split()
+            negative_words = ['nahi', 'no', 'nai', 'naa', 'cancel', 'rehne', 'mat']
+            if any(word in user_words for word in negative_words):
+                self.user_context['waiting_for_location'] = False
+                if language == 'hindi':
+                    response = "Theek hai. Koi baat nahi!\n\nAgar aapko koi aur madad chahiye toh bataayein. 😊"
+                else:
+                    response = "Okay, no problem!\n\nLet me know if you need any other help. 😊"
+                self.log_conversation(user_input, response, 'declined_clinic')
+                return response
+            
+            # Check if user is saying yes/haan (confirming they want clinic info)
+            affirmative_words = ['yes', 'haan', 'ha', 'ji', 'zaroor', 'chahiye', 'chahie', 
+                                'sure', 'ok', 'okay', 'please', 'kripya', 'batao', 'bataye']
+            if any(word in user_words for word in affirmative_words) and len(user_input.split()) <= 3:
+                # User confirmed but didn't provide location yet
+                if language == 'hindi':
+                    response = "Kripya apna area, city, ya pincode clearly bataayein.\n\nUdaharan: 'Lucknow', 'Gomti Nagar', '226010'"
+                else:
+                    response = "Please clearly share your area, city, or pincode.\n\nExample: 'Lucknow', 'Gomti Nagar', '226010'"
+                self.log_conversation(user_input, response, 'location_request')
+                return response
+            
+            # Try to extract location
+            location = extract_location(user_input)
+            if location:
+                logger.info(f"User provided location (continuation): {location}")
+                self.user_context['location'] = location
+                self.user_context['waiting_for_location'] = False
+                response = find_nearby_clinics(location, language)
+                detected_intent = 'clinic_search'
+                self.log_conversation(user_input, response, detected_intent)
+                self.update_user_profile()
+                return response
+            else:
+                # Still waiting for valid location
+                if language == 'hindi':
+                    response = "Kripya apna area, city, ya pincode clearly bataayein.\n\nUdaharan: 'Lucknow', 'Gomti Nagar', '226010'"
+                else:
+                    response = "Please clearly share your area, city, or pincode.\n\nExample: 'Lucknow', 'Gomti Nagar', '226010'"
+                self.log_conversation(user_input, response, 'location_request')
+                return response
+        
         # Check if user is asking about image analysis
         if self.image_analyzer.detect_image_request(user_input):
             response = self.image_analyzer.get_image_analysis_instructions(language)
@@ -186,13 +235,15 @@ class SwasthyaGuide:
             location = extract_location(user_input)
             if location:
                 self.user_context['location'] = location
+                self.user_context['waiting_for_location'] = False
                 response = find_nearby_clinics(location, language)
             else:
-                # Ask for location
+                # Ask for location and set state
+                self.user_context['waiting_for_location'] = True
                 if language == 'hindi':
-                    response = "Kripya apna area, city, ya pincode bataayein toh main aapko najdeeki clinic suggest kar sakta/sakti hoon."
+                    response = "Kripya apna area, city, ya pincode bataayein toh main aapko najdeeki clinic suggest kar sakta/sakti hoon.\n\nUdaharan: 'Lucknow', 'Gomti Nagar', '226010'"
                 else:
-                    response = "Please share your area, city, or pincode so I can suggest nearby clinics."
+                    response = "Please share your area, city, or pincode so I can suggest nearby clinics.\n\nExample: 'Lucknow', 'Gomti Nagar', '226010'"
             self.log_conversation(user_input, response, detected_intent)
             self.update_user_profile()
             return response
@@ -201,8 +252,16 @@ class SwasthyaGuide:
         symptoms = extract_symptoms(user_input)
         if symptoms:
             self.user_context['symptoms'] = symptoms
+            self.user_context['last_detected_symptoms'] = symptoms
             detected_intent = 'symptom_check'
             response = get_symptom_response(symptoms, language)
+            
+            # Set flag to wait for location if response asks about clinic
+            if ('najdeeki clinic' in response.lower() or 
+                'nearby clinic' in response.lower() or
+                'clinic suggest' in response.lower()):
+                self.user_context['waiting_for_location'] = True
+                logger.info("Symptom response includes clinic question - waiting for location")
         else:
             # Default: general health tips
             response = get_general_health_tips(language)
