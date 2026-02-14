@@ -2,11 +2,13 @@
 """
 Clinic Finder Module
 Finds and returns nearby clinics based on user location
-Uses PostgreSQL database
+Uses PostgreSQL database with JSON file fallback
 """
 
+import json
 import logging
 from typing import Optional, List
+from pathlib import Path
 from sqlalchemy import or_
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,38 @@ try:
 except ImportError:
     DB_AVAILABLE = False
     logger.warning("Database module not available - clinic search will use fallback")
+
+# Load clinics from JSON file
+CLINICS_DATA = None
+
+def load_clinics_json():
+    """Load clinics data from JSON file"""
+    global CLINICS_DATA
+    if CLINICS_DATA is not None:
+        return CLINICS_DATA
+    
+    try:
+        # Try multiple possible paths
+        json_paths = [
+            Path('data/clinics.json'),
+            Path('clinics.json'),
+            Path('../data/clinics.json')
+        ]
+        
+        for json_path in json_paths:
+            if json_path.exists():
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    CLINICS_DATA = json.load(f)
+                    logger.info(f"Loaded clinics data from {json_path}")
+                    return CLINICS_DATA
+        
+        logger.warning("Could not find clinics.json file")
+        CLINICS_DATA = {}
+        return CLINICS_DATA
+    except Exception as e:
+        logger.error(f"Error loading clinics.json: {e}")
+        CLINICS_DATA = {}
+        return CLINICS_DATA
 
 
 def check_for_clinic_request(text: str) -> bool:
@@ -39,6 +73,11 @@ def extract_location(text: str) -> Optional[str]:
     
     # Clean the input
     text = text.strip()
+    
+    # If input is a location key format (e.g., "Lucknow_Gomti_Nagar_Patrakarpuram")
+    if '_' in text and text.replace('_', '').replace(' ', '').isalnum():
+        logger.info(f"Detected location key format: {text}")
+        return text
     
     # If input is a pincode (6 digits), return as is
     if text.isdigit() and len(text) == 6:
@@ -74,7 +113,53 @@ def extract_location(text: str) -> Optional[str]:
     return None
 
 
-def search_clinics_in_db(location: str, limit: int = 5) -> List[Clinic]:
+def search_clinics_in_json(location: str, limit: int = 10) -> List[dict]:
+    """
+    Search for clinics in JSON file
+    
+    Args:
+        location: Location string to search for
+        limit: Maximum number of clinics to return
+    
+    Returns:
+        List of clinic dictionaries
+    """
+    clinics_data = load_clinics_json()
+    if not clinics_data:
+        return []
+    
+    location_clean = location.strip()
+    matching_clinics = []
+    
+    # Strategy 1: Exact location key match (e.g., "Lucknow_Gomti_Nagar_Patrakarpuram")
+    if location_clean in clinics_data:
+        logger.info(f"Found exact location key match: {location_clean}")
+        matching_clinics = clinics_data[location_clean]
+        return matching_clinics[:limit]
+    
+    # Strategy 2: Partial match in location keys (case-insensitive)
+    location_lower = location_clean.lower()
+    for location_key, clinics in clinics_data.items():
+        if location_lower in location_key.lower():
+            logger.info(f"Found partial match in key: {location_key}")
+            matching_clinics.extend(clinics)
+    
+    if matching_clinics:
+        return matching_clinics[:limit]
+    
+    # Strategy 3: Search in clinic addresses and names (for pincode or area name)
+    for location_key, clinics in clinics_data.items():
+        for clinic in clinics:
+            # Check if location appears in address or name
+            if (location_lower in clinic.get('address', '').lower() or
+                location_lower in clinic.get('name', '').lower()):
+                if clinic not in matching_clinics:  # Avoid duplicates
+                    matching_clinics.append(clinic)
+    
+    return matching_clinics[:limit]
+
+
+def search_clinics_in_db(location: str, limit: int = 5) -> List[dict]:
     """
     Search for clinics in PostgreSQL database
     
@@ -83,7 +168,7 @@ def search_clinics_in_db(location: str, limit: int = 5) -> List[Clinic]:
         limit: Maximum number of clinics to return
     
     Returns:
-        List of Clinic objects
+        List of clinic dictionaries
     """
     if not DB_AVAILABLE:
         logger.warning("Database not available for clinic search")
@@ -120,8 +205,13 @@ def search_clinics_in_db(location: str, limit: int = 5) -> List[Clinic]:
 def find_nearby_clinics(location: str, language: str) -> str:
     """Find and return nearby clinics based on location"""
     
-    # Search in database
-    matching_clinics = search_clinics_in_db(location, limit=5)
+    # First, try database search
+    matching_clinics = search_clinics_in_db(location, limit=10)
+    
+    # If database is empty or unavailable, use JSON fallback
+    if not matching_clinics:
+        logger.info("Database search returned no results, trying JSON fallback")
+        matching_clinics = search_clinics_in_json(location, limit=10)
     
     if not matching_clinics:
         # No clinics found
@@ -130,23 +220,27 @@ def find_nearby_clinics(location: str, language: str) -> str:
 Maaf kijiye, mere database mein "{location}" ke liye clinic information nahi hai.
 
 **Aap ye kar sakte hain:**
+• Location key format mein try karein (jaise: Lucknow_Gomti_Nagar_Patrakarpuram)
+• Sirf area naam dijiye (jaise: Patrakarpuram, Gomti Nagar)
+• Pincode dijiye (jaise: 226010)
 • Google Maps par "clinic near me" search karein
 • Local hospital ka helpline number call karein
-• Kisi aur najdeeki area ka naam try karein
 
 Ya fir doctor ko urgent dekhna hai toh:
 • Najdeeki government hospital jayein
 • 108 (Ambulance/Health helpline) dial karein
 
-Koi aur area ka naam bataana chahenge?
+Koi aur location format try karna chahenge?
 """,
             'english': f"""
 Sorry, I don't have clinic information for "{location}" in my database.
 
 **You can try:**
+• Location key format (e.g., Lucknow_Gomti_Nagar_Patrakarpuram)
+• Just the area name (e.g., Patrakarpuram, Gomti Nagar)
+• Pincode (e.g., 226010)
 • Search "clinic near me" on Google Maps
 • Call local hospital helpline
-• Try a different nearby area name
 
 If urgent doctor visit needed:
 • Visit nearest government hospital
@@ -302,15 +396,27 @@ Would you like to try a different area?
     }
     
     headers = language_headers.get(language, language_headers['hindi'])
-    clinic_text = headers['title']
     
-    for i, clinic in enumerate(matching_clinics[:3], 1):
+    # Show message about number of results
+    num_clinics = len(matching_clinics)
+    if language == 'hindi':
+        clinic_text = f"**{location} ke najdeeki {num_clinics} clinics mil gaye:**\n\n"
+    else:
+        clinic_text = f"**Found {num_clinics} nearby clinics in {location}:**\n\n"
+    
+    # Show all matching clinics (up to limit)
+    for i, clinic in enumerate(matching_clinics[:10], 1):
         clinic_text += f"{i}. **{clinic['name']}**\n"
-        clinic_text += f"   {headers['address']}: {clinic['address']}\n"
-        if 'timing' in clinic:
+        clinic_text += f"   {headers['address']}: {clinic.get('address', 'N/A')}\n"
+        if clinic.get('timing'):
             clinic_text += f"   {headers['timing']}: {clinic['timing']}\n"
-        if 'phone' in clinic:
+        if clinic.get('phone'):
             clinic_text += f"   {headers['phone']}: {clinic['phone']}\n"
+        if clinic.get('specialties'):
+            specialties = ', '.join(clinic['specialties']) if isinstance(clinic['specialties'], list) else clinic['specialties']
+            clinic_text += f"   🏥 Specialties: {specialties}\n"
+        if clinic.get('fees'):
+            clinic_text += f"   💰 Fees: {clinic['fees']}\n"
         clinic_text += "\n"
     
     clinic_text += headers['footer']
