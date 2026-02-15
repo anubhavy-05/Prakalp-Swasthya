@@ -9,11 +9,14 @@ import base64
 import io
 import os
 import json
+import logging
 import numpy as np
 from typing import Dict, List, Optional, Tuple, Any
 from PIL import Image, ImageEnhance, ImageFilter, ImageStat
 from datetime import datetime
 import hashlib
+
+logger = logging.getLogger(__name__)
 
 
 class ImageAnalyzer:
@@ -508,9 +511,74 @@ class ImageAnalyzer:
             }
             
         except Exception as e:
+            # Try simplified analysis as fallback
+            try:
+                logger.warning(f"Comprehensive analysis failed, trying simplified mode: {str(e)}")
+                return self._simplified_analysis(image_data, language, metadata)
+            except:
+                return {
+                    'success': False,
+                    'error': f"Error processing image: {str(e)}",
+                    'analysis': None
+                }
+    
+    def _simplified_analysis(self, image_data: bytes, language: str, metadata: Dict) -> Dict:
+        """
+        Simplified analysis as fallback when comprehensive analysis fails
+        """
+        try:
+            # Just open and do basic checks
+            image = Image.open(io.BytesIO(image_data))
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            # Basic message
+            basic_recommendations = [
+                "🔬 BASIC IMAGE ANALYSIS:",
+                "",
+                "✅ Image received successfully",
+                f"📊 Resolution: {image.size[0]}x{image.size[1]}",
+                "",
+                "⚠️ IMPORTANT: This is a basic analysis only",
+                "",
+            ]
+            
+            if language in ['hindi', 'hinglish']:
+                basic_recommendations.extend([
+                    "📋 RECOMMENDED ACTIONS:",
+                    "• Agar skin problem hai toh dermatologist ko dikhayein",
+                    "• Affected area ko clean aur dry rakhein",
+                    "• Self-medication avoid karein",
+                    "• Condition monitor karein",
+                    ""
+                ])
+            else:
+                basic_recommendations.extend([
+                    "📋 RECOMMENDED ACTIONS:",
+                    "• Consult a dermatologist if you have skin concerns",
+                    "• Keep the affected area clean and dry",
+                    "• Avoid self-medication",
+                    "• Monitor the condition",
+                    ""
+                ])
+            
+            analysis = {
+                'metadata': metadata,
+                'image_quality': 'processed',
+                'resolution': f"{image.size[0]}x{image.size[1]}",
+                'recommendations': basic_recommendations,
+                'disclaimer': self._get_disclaimer(language)
+            }
+            
+            return {
+                'success': True,
+                'error': None,
+                'analysis': analysis
+            }
+        except Exception as e:
             return {
                 'success': False,
-                'error': f"Error processing image: {str(e)}",
+                'error': f"Simplified analysis also failed: {str(e)}",
                 'analysis': None
             }
     
