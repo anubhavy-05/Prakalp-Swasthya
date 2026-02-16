@@ -60,6 +60,16 @@ def detect_emergency(text: str) -> bool:
 def get_emergency_response(language: str) -> str:
     """Generate emergency response message"""
     responses = {
+        'hinglish': """
+🚨 YEH EMERGENCY JAISA LAG RAHA HAI!
+
+KRIPYA TURANT:
+✅ Apne najdeeki hospital ya emergency service se contact karein
+✅ 108 (Ambulance) dial karein
+✅ Kisi ko saath mein rakhein
+
+Agar possible ho toh immediately hospital jayein. Delay na karein!
+""",
         'hindi': """
 🚨 YEH EMERGENCY JAISA LAG RAHA HAI!
 

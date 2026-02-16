@@ -93,7 +93,9 @@ def detect_by_script(text: str) -> str:
         elif max_script == 'gujarati':
             return 'gujarati'
         elif max_script == 'latin':
-            return 'english'
+            # Don't return 'english' yet - let keyword detection distinguish
+            # between English and Hinglish (Romanized Hindi)
+            return None
     
     return None
 
@@ -129,20 +131,24 @@ def detect_by_keywords(text: str) -> str:
     """
     text_lower = text.lower()
     
+    # Check if text has Devanagari script or only Latin
+    has_devanagari = any(0x0900 <= ord(char) <= 0x097F for char in text)
+    
     # Language-specific keyword patterns with weights
     language_patterns = {
-        'hindi': {
+        'hinglish': {  # Romanized Hindi (Hindi words in English script)
             'patterns': ['hai', 'hain', 'mujhe', 'kya', 'aap', 'ko', 'se', 'mein', 
                         'ka', 'ki', 'ho', 'thi', 'tha', 'main', 'aapko', 'mere',
                         'tumhe', 'usko', 'yeh', 'woh', 'kaise', 'kahan', 'kab',
-                        'bukhar', 'dard', 'sir', 'pet', 'doctor', 'clinic'],
-            'weight': 1
+                        'bukhar', 'dard', 'sir', 'pet', 'kripya', 'zaroor', 'chahiye',
+                        'najdeeki', 'batao', 'bataye', 'dijiye', 'karein', 'hona'],
+            'weight': 1.2 if not has_devanagari else 0  # Only match if no Devanagari
         },
         'english': {
             'patterns': ['the', 'is', 'are', 'was', 'were', 'what', 'how', 'can', 
                         'have', 'has', 'with', 'for', 'from', 'this', 'that',
                         'my', 'your', 'his', 'her', 'their', 'pain', 'fever',
-                        'headache', 'stomach', 'doctor', 'clinic', 'need', 'help'],
+                        'headache', 'stomach', 'need', 'help', 'please', 'want'],
             'weight': 1
         },
         'marathi': {
@@ -192,11 +198,23 @@ def detect_by_keywords(text: str) -> str:
         max_lang = max(scores, key=scores.get)
         max_score = scores[max_lang]
         
-        # Require at least 2 matches to confirm language
-        if max_score >= 2:
+        # For Hinglish, require at least 1 match (more lenient)
+        # For other languages, require at least 2 matches
+        min_score = 1 if max_lang == 'hinglish' else 2
+        
+        if max_score >= min_score:
             return max_lang
     
-    # Default to Hindi for Indian context
+    # Default fallback logic
+    # If text is in Latin script but has Hindi indicators, default to Hinglish  
+    if not has_devanagari and any(word in text_lower for word in ['hai', 'hain', 'mein', 'ko', 'se', 'ka', 'ki', 'aap', 'mujhe', 'kya', 'kahan', 'bukhar', 'dard']):
+        return 'hinglish'
+    
+    # Pure English default for Latin script
+    if not has_devanagari:
+        return 'english'
+    
+    # Default to Hindi for Devanagari script
     return 'hindi'
 
 
@@ -206,12 +224,13 @@ def get_language_name(lang_code: str) -> str:
     """
     language_names = {
         'hindi': 'Hindi (हिंदी)',
+        'hinglish': 'Hinglish (Hindi in English)',
         'english': 'English',
         'marathi': 'Marathi (मराठी)',
         'bengali': 'Bengali (বাংলা)',
-        'tamil': 'Tamil (தமிழ்)',
+        'tamil': 'Tamil (தमिழ்)',
         'telugu': 'Telugu (తెలుగు)',
         'punjabi': 'Punjabi (ਪੰਜਾਬੀ)',
         'gujarati': 'Gujarati (ગુજરાતી)'
     }
-    return language_names.get(lang_code, 'Hindi')
+    return language_names.get(lang_code, 'Hinglish')
