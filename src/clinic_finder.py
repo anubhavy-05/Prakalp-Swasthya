@@ -102,14 +102,19 @@ def extract_location(text: str) -> Optional[str]:
     if location_words:
         # Join extracted words (up to 3 words for compound locations)
         location = ' '.join(location_words[:3])
+        
+        # Validate: Don't accept text that looks like a symptom description
+        symptom_indicators = ['hai', 'ho', 'raha', 'gaya', 'feeling', 'have', 'got', 
+                             'mujhe', 'mera', 'my', 'me', 'dard', 'pain', 'ache']
+        if any(indicator in location.lower() for indicator in symptom_indicators):
+            logger.info(f"Rejected as location (looks like symptom): {location}")
+            return None
+        
         logger.info(f"Extracted location: {location}")
         return location
     
-    # If no words matched but input had content, return cleaned input
-    if len(text) > 2:
-        logger.info(f"Using full input as location: {text}")
-        return text
-    
+    # Don't blindly return any input as location - this causes false matches
+    # Only very specific patterns should reach here
     return None
 
 
