@@ -164,6 +164,28 @@ class SwasthyaGuide:
         
         # Check if we're waiting for location from previous conversation
         if self.user_context.get('waiting_for_location', False):
+            # FIRST: Check if user is reporting a NEW SYMPTOM instead of providing location
+            # This prevents getting stuck in location-waiting mode
+            new_symptoms = extract_symptoms(user_input)
+            if new_symptoms:
+                logger.info(f"New symptom detected while waiting for location: {new_symptoms}. Resetting location wait.")
+                self.user_context['waiting_for_location'] = False
+                self.user_context['symptoms'] = new_symptoms
+                self.user_context['last_detected_symptoms'] = new_symptoms
+                detected_intent = 'symptom_check'
+                response = get_symptom_response(new_symptoms, language)
+                
+                # Set flag to wait for location if response asks about clinic
+                if ('najdeeki clinic' in response.lower() or 
+                    'nearby clinic' in response.lower() or
+                    'clinic suggest' in response.lower()):
+                    self.user_context['waiting_for_location'] = True
+                    logger.info("Symptom response includes clinic question - waiting for location")
+                
+                self.log_conversation(user_input, response, detected_intent)
+                self.update_user_profile()
+                return response
+            
             # Check if user is declining the clinic search (use word boundaries)
             user_input_lower = user_input.lower()
             user_words = user_input_lower.split()
