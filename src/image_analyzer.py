@@ -3,6 +3,7 @@
 Advanced Image Analysis Module
 Analyzes medical images for skin conditions, rashes, and diagnostics
 Enhanced with AI-powered analysis, color detection, and texture analysis
+Now powered by Hugging Face AI for accurate medical image understanding
 """
 
 import base64
@@ -15,18 +16,39 @@ from typing import Dict, List, Optional, Tuple, Any
 from PIL import Image, ImageEnhance, ImageFilter, ImageStat
 from datetime import datetime
 import hashlib
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 class ImageAnalyzer:
-    """Handles advanced medical image analysis"""
+    """Handles advanced medical image analysis with AI-powered insights"""
     
     def __init__(self):
-        """Initialize the advanced image analyzer"""
+        """Initialize the advanced image analyzer with Hugging Face AI"""
         self.supported_formats = ['jpg', 'jpeg', 'png', 'webp']
         self.max_image_size = 10 * 1024 * 1024  # 10MB
         self.min_image_size = 1024  # 1KB
+        
+        # Hugging Face API configuration
+        self.hf_api_key = os.getenv("HUGGINGFACE_API_KEY")
+        self.hf_api_url = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
+        
+        # Check if API key is available
+        if not self.hf_api_key:
+            logger.warning("⚠️ HUGGINGFACE_API_KEY not found! AI-powered analysis will be disabled.")
+            logger.warning("   Add your token to .env file: HUGGINGFACE_API_KEY=hf_your_token")
+            self.ai_enabled = False
+        elif self.hf_api_key.startswith("hf_your"):
+            logger.warning("⚠️ Please replace placeholder Hugging Face API key with your actual token")
+            self.ai_enabled = False
+        else:
+            logger.info("✅ Hugging Face AI enabled for medical image analysis")
+            self.ai_enabled = True
         
         # Enhanced skin condition categories with characteristics
         self.skin_conditions = {
@@ -428,10 +450,157 @@ class ImageAnalyzer:
         else:
             return "low"
     
+    def analyze_with_ai(self, image_data: bytes) -> Dict[str, Any]:
+        """
+        Use Hugging Face AI to analyze medical image
+        Returns AI-generated description and medical insights
+        """
+        if not self.ai_enabled:
+            return {
+                'success': False,
+                'description': None,
+                'medical_keywords': [],
+                'error': 'AI analysis not available. Please configure HUGGINGFACE_API_KEY in .env file'
+            }
+        
+        try:
+            logger.info("Starting AI-powered image analysis with Hugging Face...")
+            
+            # Prepare headers with API key
+            headers = {
+                "Authorization": f"Bearer {self.hf_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            # Convert image to base64
+            image_b64 = base64.b64encode(image_data).decode('utf-8')
+            
+            # Call Hugging Face API
+            response = requests.post(
+                self.hf_api_url,
+                headers=headers,
+                json={"inputs": image_b64},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Extract description
+                if isinstance(result, list) and len(result) > 0:
+                    description = result[0].get('generated_text', '')
+                elif isinstance(result, dict):
+                    description = result.get('generated_text', '')
+                else:
+                    description = str(result)
+                
+                logger.info(f"AI Analysis successful: {description[:100]}...")
+                
+                # Extract medical keywords from description
+                medical_keywords = self._extract_medical_keywords(description)
+                
+                # Map AI description to known conditions
+                condition_mapping = self._map_ai_to_conditions(description, medical_keywords)
+                
+                return {
+                    'success': True,
+                    'description': description,
+                    'medical_keywords': medical_keywords,
+                    'condition_mapping': condition_mapping,
+                    'confidence': 'high' if len(medical_keywords) > 2 else 'medium',
+                    'error': None
+                }
+            
+            else:
+                error_msg = f"AI API returned status {response.status_code}"
+                logger.error(f"{error_msg}: {response.text[:200]}")
+                return {
+                    'success': False,
+                    'description': None,
+                    'medical_keywords': [],
+                    'error': error_msg
+                }
+                
+        except Exception as e:
+            logger.error(f"AI analysis failed: {str(e)}", exc_info=True)
+            return {
+                'success': False,
+                'description': None,
+                'medical_keywords': [],
+                'error': f"AI analysis error: {str(e)}"
+            }
+    
+    def _extract_medical_keywords(self, description: str) -> List[str]:
+        """Extract medical keywords from AI-generated description"""
+        medical_terms = [
+            # Skin conditions
+            'rash', 'redness', 'red', 'irritation', 'inflammation', 'swelling',
+            'acne', 'pimple', 'spot', 'blemish', 'blackhead', 'whitehead',
+            'eczema', 'dermatitis', 'dry', 'flaky', 'scaly', 'itchy',
+            'burn', 'blister', 'wound', 'cut', 'injury', 'abrasion',
+            'fungal', 'infection', 'ringworm', 'athlete', 'foot',
+            'hives', 'urticaria', 'allergy', 'allergic', 'reaction',
+            'insect', 'bite', 'sting', 'mosquito', 'bee',
+            'bruise', 'contusion', 'purple', 'discoloration',
+            'mole', 'nevus', 'dark', 'spot', 'lesion',
+            'psoriasis', 'plaque', 'thick', 'silvery',
+            # Symptoms
+            'pain', 'painful', 'sore', 'tender', 'hurt',
+            'itch', 'itching', 'scratch',
+            'pus', 'discharge', 'oozing', 'weeping',
+            'crusting', 'scab', 'healing',
+            # Body parts
+            'skin', 'arm', 'leg', 'hand', 'foot', 'face', 'back', 'chest',
+            # Descriptors
+            'small', 'large', 'circular', 'irregular', 'raised', 'flat'
+        ]
+        
+        found_keywords = []
+        description_lower = description.lower()
+        
+        for term in medical_terms:
+            if term in description_lower:
+                found_keywords.append(term)
+        
+        return list(set(found_keywords))  # Remove duplicates
+    
+    def _map_ai_to_conditions(self, description: str, keywords: List[str]) -> Dict[str, float]:
+        """Map AI description to known skin conditions with confidence scores"""
+        condition_scores = {}
+        description_lower = description.lower()
+        
+        for condition_name, condition_info in self.skin_conditions.items():
+            score = 0.0
+            
+            # Check for keyword matches
+            for keyword in condition_info['keywords']:
+                if keyword in description_lower:
+                    score += 1.0
+            
+            # Check for matched medical keywords
+            for med_keyword in keywords:
+                if med_keyword in ' '.join(condition_info['keywords']):
+                    score += 0.5
+            
+            # Normalize score
+            if score > 0:
+                max_possible = len(condition_info['keywords'])
+                normalized_score = min(1.0, score / max_possible)
+                condition_scores[condition_name] = normalized_score
+        
+        # Sort by confidence
+        sorted_conditions = dict(sorted(
+            condition_scores.items(),
+            key=lambda x: x[1],
+            reverse=True
+        ))
+        
+        return sorted_conditions
+    
     def analyze_skin_condition(self, image_data: bytes, language: str = 'english') -> Dict:
         """
         Advanced skin condition analysis with comprehensive diagnostics
-        Combines color analysis, texture detection, and pattern recognition
+        Combines AI-powered analysis with color, texture detection, and pattern recognition
         """
         # Validate image with metadata
         is_valid, message, metadata = self.validate_image(image_data, 'image/jpeg')
@@ -446,14 +615,34 @@ class ImageAnalyzer:
         try:
             original_image, enhanced_image = self.preprocess_image(image_data, enhance=True)
             
-            # Perform comprehensive analysis
+            # AI-powered analysis (primary method)
+            ai_analysis = self.analyze_with_ai(image_data)
+            
+            # Perform comprehensive traditional CV analysis (backup/supplementary)
             comprehensive_analysis = self.analyze_image_comprehensive(original_image, enhanced_image)
             
-            # Detect potential conditions
+            # Detect potential conditions (merge AI and CV results)
             condition_detection = self.detect_skin_condition_type(
                 comprehensive_analysis['color_analysis'],
                 comprehensive_analysis['texture_analysis']
             )
+            
+            # Enhance condition detection with AI insights
+            if ai_analysis['success']:
+                # Add AI-detected conditions to findings
+                ai_conditions = ai_analysis.get('condition_mapping', {})
+                for condition, confidence in ai_conditions.items():
+                    if confidence > 0.5:  # Only include high-confidence AI detections
+                        # Check if already detected by CV analysis
+                        existing = next((f for f in condition_detection['findings'] 
+                                       if f['condition'] == condition), None)
+                        if not existing:
+                            condition_detection['findings'].append({
+                                'condition': condition,
+                                'confidence': 'high' if confidence > 0.7 else 'medium',
+                                'indicators': ai_analysis.get('medical_keywords', []),
+                                'source': 'AI-powered'
+                            })
             
             # Generate severity assessment
             severity = self._assess_severity(
@@ -465,7 +654,8 @@ class ImageAnalyzer:
             recommendations = self._get_detailed_recommendations(
                 condition_detection,
                 severity,
-                language
+                language,
+                ai_analysis  # Pass AI analysis for more specific recommendations
             )
             
             # Build complete analysis report
@@ -474,6 +664,15 @@ class ImageAnalyzer:
                 'image_quality': comprehensive_analysis['quality_score'],
                 'resolution': comprehensive_analysis['resolution'],
                 'analysis_timestamp': datetime.now().isoformat(),
+                'ai_analysis': {
+                    'enabled': ai_analysis['success'],
+                    'description': ai_analysis.get('description', 'AI analysis not available'),
+                    'medical_keywords': ai_analysis.get('medical_keywords', []),
+                    'confidence': ai_analysis.get('confidence', 'N/A')
+                } if ai_analysis['success'] else {
+                    'enabled': False,
+                    'error': ai_analysis.get('error', 'AI unavailable')
+                },
                 'visual_analysis': {
                     'color_metrics': {
                         'mean_rgb': comprehensive_analysis['color_analysis']['mean_rgb'],
@@ -501,7 +700,8 @@ class ImageAnalyzer:
                 'timestamp': datetime.now().isoformat(),
                 'image_hash': metadata['image_hash'],
                 'findings': condition_detection['findings'],
-                'severity': severity
+                'severity': severity,
+                'ai_enabled': ai_analysis['success']
             })
             
             return {
@@ -664,14 +864,23 @@ class ImageAnalyzer:
         
         return 'moderate (preliminary analysis)'
     
-    def _get_detailed_recommendations(self, condition_detection: Dict, severity: Dict, language: str) -> List[str]:
+    def _get_detailed_recommendations(self, condition_detection: Dict, severity: Dict, language: str, ai_analysis: Dict = None) -> List[str]:
         """
         Generate detailed, context-aware recommendations
+        Enhanced with AI insights when available
         """
         findings = condition_detection.get('findings', [])
         severity_level = severity.get('level', 'minimal')
         
         recommendations = []
+        
+        # Add AI insights if available
+        if ai_analysis and ai_analysis.get('success'):
+            ai_desc = ai_analysis.get('description', '')
+            if ai_desc:
+                recommendations.append("🤖 AI ANALYSIS:")
+                recommendations.append(f"   {ai_desc}")
+                recommendations.append("")
         
         # Language-specific recommendations
         if language == 'hindi':
