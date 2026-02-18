@@ -171,10 +171,21 @@ def whatsapp_webhook():
                 
                 logger.info("Downloading image from Twilio...")
                 
+                # Check if Twilio credentials are configured
+                if not Config.TWILIO_ACCOUNT_SID or Config.TWILIO_ACCOUNT_SID.startswith('your_'):
+                    logger.error("Twilio credentials not configured!")
+                    raise ValueError("Server configuration error: Twilio credentials missing")
+                
                 # Download image from Twilio's media URL with authentication
                 # Twilio requires HTTP Basic Auth to access media files
                 auth = (Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN)
                 media_response = requests.get(media_url, auth=auth, timeout=15)
+                
+                # Check response status
+                if media_response.status_code == 401:
+                    logger.error("Twilio authentication failed - check credentials in .env")
+                    raise ValueError("Authentication failed. Please contact support.")
+                    
                 media_response.raise_for_status()
                 image_data = media_response.content
                 
@@ -196,7 +207,14 @@ def whatsapp_webhook():
             except requests.exceptions.RequestException as e:
                 logger.error(f"Error downloading image from Twilio: {str(e)}", exc_info=True)
                 resp = MessagingResponse()
-                resp.message("छवि डाउनलोड करने में त्रुटि। कृपया पुनः प्रयास करें। / Error downloading image. Please try again.")
+                
+                # Provide more specific error message
+                if "401" in str(e) or "Unauthorized" in str(e):
+                    error_msg = "⚠️ Server configuration error. Please contact administrator.\n\nसर्वर कॉन्फ़िगरेशन त्रुटि। कृपया व्यवस्थापक से संपर्क करें।"
+                else:
+                    error_msg = "छवि डाउनलोड करने में त्रुटि। कृपया पुनः प्रयास करें। / Error downloading image. Please try again."
+                
+                resp.message(error_msg)
                 return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
             
             except ValueError as e:
@@ -229,8 +247,13 @@ def whatsapp_webhook():
         
         # Process message through SwasthyaGuide bot
         logger.info(f"Processing message through bot...")
-        bot_response = session_bot.process_message(incoming_msg)
-        logger.info(f"Bot response generated: {bot_response[:100]}...")
+        try:
+            bot_response = session_bot.process_message(incoming_msg)
+            logger.info(f"Bot response generated successfully: {len(bot_response)} characters")
+            logger.info(f"Bot response preview: {bot_response[:150]}...")
+        except Exception as bot_error:
+            logger.error(f"Error in bot.process_message(): {str(bot_error)}", exc_info=True)
+            raise  # Re-raise to be caught by outer handler
         
         # Create Twilio response
         resp = MessagingResponse()
@@ -240,7 +263,9 @@ def whatsapp_webhook():
         return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
         
     except Exception as e:
-        logger.error(f"Error processing message: {str(e)}", exc_info=True)
+        logger.error(f"CRITICAL ERROR in whatsapp_webhook: {str(e)}", exc_info=True)
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Error occurred while processing: '{incoming_msg if 'incoming_msg' in locals() else 'N/A'}'")
         
         # Send error message to user
         resp = MessagingResponse()
