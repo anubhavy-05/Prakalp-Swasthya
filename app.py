@@ -11,6 +11,7 @@ from flask import Flask, request, jsonify
 from twilio.twiml.messaging_response import MessagingResponse
 from src.chatbot import SwasthyaGuide
 from src.config_loader import Config
+from src.voice_handler import get_voice_handler
 import requests
 
 # Configure logging
@@ -163,6 +164,84 @@ def whatsapp_webhook():
             
             logger.info(f"Media URL: {media_url}, Type: {media_type}")
             
+            # --- VOICE MESSAGE HANDLING ---
+            # Check if it's a voice/audio message
+            if media_type and ('audio' in media_type.lower() or 'ogg' in media_type.lower()):
+                logger.info(f"🎤 Voice message detected! Type: {media_type}")
+                
+                try:
+                    # Get voice handler
+                    voice_handler = get_voice_handler()
+                    
+                    # Verify Twilio credentials
+                    if not Config.TWILIO_ACCOUNT_SID or Config.TWILIO_ACCOUNT_SID.startswith('your_'):
+                        logger.error("Twilio credentials not configured!")
+                        raise ValueError("Server configuration error")
+                    
+                    auth = (Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN)
+                    
+                    # Get user's language preference from session
+                    user_language = session_bot.user_context.get('language', 'hindi')
+                    
+                    # Process voice message: download -> convert -> transcribe
+                    logger.info("Processing voice message...")
+                    transcribed_text, detected_language = voice_handler.process_voice_message(
+                        media_url, 
+                        auth, 
+                        language_hint=user_language
+                    )
+                    
+                    if not transcribed_text:
+                        # Voice transcription failed
+                        error_msg = voice_handler.get_error_message('unclear', user_language)
+                        resp = MessagingResponse()
+                        resp.message(error_msg)
+                        return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
+                    
+                    logger.info(f"✅ Voice transcribed: '{transcribed_text}'")
+                    
+                    # Process transcribed text through chatbot
+                    bot_text_response = session_bot.process_message(transcribed_text, message_type='voice')
+                    
+                    # Log what we heard from user
+                    logger.info(f"📝 Sending text response: {bot_text_response[:100]}...")
+                    
+                    # Convert bot's text response to speech
+                    logger.info("🔊 Converting response to speech...")
+                    audio_response = voice_handler.synthesize_speech(
+                        bot_text_response, 
+                        language=session_bot.user_context.get('language', 'hindi'),
+                        voice_gender='FEMALE'
+                    )
+                    
+                    resp = MessagingResponse()
+                    msg = resp.message()
+                    
+                    # Send both text and audio response
+                    # First, add transcription confirmation (so user knows we understood)
+                    confirmation = f"🎤 आपने कहा: {transcribed_text}\n\n" if user_language == 'hindi' else f"🎤 You said: {transcribed_text}\n\n"
+                    msg.body(confirmation + bot_text_response)
+                    
+                    # Attach audio response if synthesis succeeded
+                    if audio_response:
+                        # Save audio to temporary file and get URL
+                        # Note: In production, upload to cloud storage (S3, GCS) and get public URL
+                        # For now, send text response only
+                        # TODO: Implement audio file upload to cloud storage
+                        logger.info("✅ Audio response generated (upload to cloud storage required)")
+                        msg.body(msg.body() + "\n\n🔊 [Audio response generated - cloud storage integration pending]")
+                    
+                    return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
+                    
+                except Exception as voice_error:
+                    logger.error(f"Voice message processing failed: {voice_error}", exc_info=True)
+                    user_language = session_bot.user_context.get('language', 'hindi')
+                    error_msg = voice_handler.get_error_message('service_unavailable', user_language)
+                    resp = MessagingResponse()
+                    resp.message(error_msg)
+                    return str(resp), 200, {'Content-Type': 'text/xml; charset=utf-8'}
+            
+            # --- IMAGE MESSAGE HANDLING ---
             # Download and process image
             try:
                 # Validate media URL exists
