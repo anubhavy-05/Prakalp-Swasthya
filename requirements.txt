@@ -39,6 +39,15 @@ alembic==1.13.1
 # For API integration
 requests==2.31.0
 
+# Voice Message Processing (Speech-to-Text & Text-to-Speech)
+google-cloud-speech==2.21.0
+google-cloud-texttospeech==2.14.1
+pydub==0.25.1
+# Note: ffmpeg is required for pydub (install separately on system)
+# For Windows: choco install ffmpeg
+# For Linux: apt-get install ffmpeg
+# For Mac: brew install ffmpeg
+
 # For testing
 # pytest==7.4.0
 # pytest-cov==4.1.0
