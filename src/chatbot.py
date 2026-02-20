@@ -150,9 +150,13 @@ class SwasthyaGuide:
         except Exception as e:
             logger.error(f"Failed to update user profile: {e}")
     
-    def process_message(self, user_input: str) -> str:
+    def process_message(self, user_input: str, message_type: str = 'text') -> str:
         """
         Main method to process user message and generate response
+        
+        Args:
+            user_input: User's message (text or transcribed voice)
+            message_type: Type of message ('text', 'voice', 'image')
         """
         # Detect language
         language = detect_language(user_input)
@@ -182,7 +186,7 @@ class SwasthyaGuide:
                     self.user_context['waiting_for_location'] = True
                     logger.info("Symptom response includes clinic question - waiting for location")
                 
-                self.log_conversation(user_input, response, detected_intent)
+                self.log_conversation(user_input, response, detected_intent, message_type)
                 self.update_user_profile()
                 return response
             
@@ -196,7 +200,7 @@ class SwasthyaGuide:
                     response = "Theek hai. Koi baat nahi!\n\nAgar aapko koi aur madad chahiye toh bataayein. 😊"
                 else:
                     response = "Okay, no problem!\n\nLet me know if you need any other help. 😊"
-                self.log_conversation(user_input, response, 'declined_clinic')
+                self.log_conversation(user_input, response, 'declined_clinic', message_type)
                 return response
             
             # Check if user is saying yes/haan (confirming they want clinic info)
@@ -208,7 +212,7 @@ class SwasthyaGuide:
                     response = "Kripya apna area, city, ya pincode clearly bataayein.\n\nUdaharan: 'Lucknow', 'Gomti Nagar', '226010'"
                 else:
                     response = "Please clearly share your area, city, or pincode.\n\nExample: 'Lucknow', 'Gomti Nagar', '226010'"
-                self.log_conversation(user_input, response, 'location_request')
+                self.log_conversation(user_input, response, 'location_request', message_type)
                 return response
             
             # Try to extract location
@@ -219,7 +223,7 @@ class SwasthyaGuide:
                 self.user_context['waiting_for_location'] = False
                 response = find_nearby_clinics(location, language)
                 detected_intent = 'clinic_search'
-                self.log_conversation(user_input, response, detected_intent)
+                self.log_conversation(user_input, response, detected_intent, message_type)
                 self.update_user_profile()
                 return response
             else:
@@ -228,21 +232,21 @@ class SwasthyaGuide:
                     response = "Kripya apna area, city, ya pincode clearly bataayein.\n\nUdaharan: 'Lucknow', 'Gomti Nagar', '226010'"
                 else:
                     response = "Please clearly share your area, city, or pincode.\n\nExample: 'Lucknow', 'Gomti Nagar', '226010'"
-                self.log_conversation(user_input, response, 'location_request')
+                self.log_conversation(user_input, response, 'location_request', message_type)
                 return response
         
         # Check if user is asking about image analysis
         if self.image_analyzer.detect_image_request(user_input):
             response = self.image_analyzer.get_image_analysis_instructions(language)
             detected_intent = 'image_request'
-            self.log_conversation(user_input, response, detected_intent)
+            self.log_conversation(user_input, response, detected_intent, message_type)
             return response
         
         # Check if user wants skin condition info
         if any(word in user_input.lower() for word in ['skin', 'rash', 'daad', 'kharish', 'त्वचा', 'खुजली']):
             response = self.image_analyzer.get_common_skin_conditions_info(language)
             detected_intent = 'skin_info'
-            self.log_conversation(user_input, response, detected_intent)
+            self.log_conversation(user_input, response, detected_intent, message_type)
             return response
         
         # Check for emergency
@@ -250,7 +254,7 @@ class SwasthyaGuide:
             self.user_context['emergency_detected'] = True
             response = get_emergency_response(language)
             detected_intent = 'emergency'
-            self.log_conversation(user_input, response, detected_intent)
+            self.log_conversation(user_input, response, detected_intent, message_type)
             return response
         
         # Check for clinic request
@@ -268,7 +272,7 @@ class SwasthyaGuide:
                     response = "Kripya apna area, city, ya pincode bataayein toh main aapko najdeeki clinic suggest kar sakta/sakti hoon.\n\nUdaharan: 'Lucknow', 'Gomti Nagar', '226010'"
                 else:
                     response = "Please share your area, city, or pincode so I can suggest nearby clinics.\n\nExample: 'Lucknow', 'Gomti Nagar', '226010'"
-            self.log_conversation(user_input, response, detected_intent)
+            self.log_conversation(user_input, response, detected_intent, message_type)
             self.update_user_profile()
             return response
         
@@ -291,7 +295,7 @@ class SwasthyaGuide:
             response = get_general_health_tips(language)
         
         # Log conversation
-        self.log_conversation(user_input, response, detected_intent)
+        self.log_conversation(user_input, response, detected_intent, message_type)
         self.update_user_profile()
         
         return response
